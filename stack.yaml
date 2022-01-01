@@ -1,0 +1,16 @@
+resolver:
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/18.yaml
+
+packages:
+- .
+
+extra-deps:
+  # - chart-svg-0.2.3
+  - git: https://github.com/tonyday567/chart-svg.git
+    commit: 9413958790e4fc9fee1c6bb41cdf7e30840ef0ce
+  - numhask-0.8.1.0
+  - numhask-space-0.8.1.0
+  - numhask-array-0.9.1
+  - lens-5.0.1
+  - optics-core-0.4
+  - attoparsec-0.14.2

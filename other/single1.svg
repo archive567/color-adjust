@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="30.0" viewBox="-5.0e-2 -5.0e-2 1.0 0.1" width="300.0" xmlns:xlink="http://www.w3.org/1999/xlink"><style>svg {
+  color-scheme: light dark;
+}
+{
+  .canvas g, .title g, .axisbar g, .ticktext g, .tickglyph g, .ticklines g, .legendContent g text {
+    fill: #0d0d0d;
+  }
+  .ticklines g, .tickglyph g, .legendBorder g {
+    stroke: #0d0d0d;
+  }
+}
+@media (prefers-color-scheme:dark) {
+  .canvas g, .title g, .axisbar g, .ticktext g, .tickglyph g, .ticklines g, .legendContent g text {
+    fill: #f0f0f0;
+  }
+  .ticklines g, .tickglyph g, .legendBorder g {
+    stroke: #f0f0f0;
+  }
+}</style><g class="chart"><g class="gradient"><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#02daef"><rect height="0.1" width="0.1" x="-5.0e-2" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#45d6f2"><rect height="0.1" width="0.10000000000000002" x="5.0e-2" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#62d2f3"><rect height="0.1" width="9.999999999999998e-2" x="0.15000000000000002" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#78cff2"><rect height="0.1" width="9.999999999999998e-2" x="0.25000000000000006" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#8acbef"><rect height="0.1" width="9.999999999999998e-2" x="0.35000000000000003" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#98c9ea"><rect height="0.1" width="0.10000000000000003" x="0.45" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#a4c6e4"><rect height="0.1" width="0.10000000000000009" x="0.55" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#afc4dc"><rect height="0.1" width="0.10000000000000009" x="0.65" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#b7c2d4"><rect height="0.1" width="0.10000000000000009" x="0.75" y="-5.0e-2"/></g><g stroke-opacity="1.0" fill-opacity="1.0" stroke="#a6cfe3" stroke-width="0.0" fill="#bdc2cb"><rect height="0.1" width="9.999999999999998e-2" x="0.85" y="-5.0e-2"/></g></g></g><g class="hud"></g></svg>
