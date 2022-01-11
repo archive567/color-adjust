@@ -1,32 +1,6 @@
 #+TITLE: color-adjust
 #+PROPERTY: header-args    :eval no-export
 
-* ToDo color-adjust todo list
-
-- [X] convert a Colour into css
-- [X] convert a Colour into the various other types.
-- [X] round-trip a Colour
-- [ ] wheel
-- [ ] statistics of color combinations
-- [ ] algorithm
-
-  [[https://blog.datawrapper.de/beautifulcolors/][How to pick more beautiful colors for your data visualizations - Datawrapper ...]]
-
-  - [ ] combine colors with different lightness
-  - [ ] avoid bright, saturated colors
-  - [ ] concentrate in the color wheel
-    - [ ] 2 complementary (*2 close) should score highly
-    - [ ] off by a bit (in hue just a bit)
-  - [ ] don't use forest green 90 to 150, peak at 120
-    lighten it but also desaturate
-  - [ ] avoid 0 60 120 180 240 360
-    - tune down saturation
-    - darken them
-  - [ ] vary grayscale, avoid light, saturated
-- [ ] random color generation
-  - swatches
-  - charts
-
 * color-adjust
 
 ** default combo
