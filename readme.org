@@ -2,7 +2,10 @@
 #+PROPERTY: header-args    :eval no-export
 
 * color-adjust
-
+:PROPERTIES:
+:EXPORT_FILE_NAME: color-adjust
+:export_date: 2022-1-16
+:END:
 ** default combo
 
 #+begin_src haskell
@@ -70,119 +73,7 @@ writeChartSvg "other/combo.svg" $ mempty & #hudOptions .~ defaultHudOptions & #c
 #+RESULTS:
 [[file:other/combo.svg]]
 
-** gradient
-
-#+begin_src haskell :file other/grad1.svg :results output graphics file :exports both
- writeChartSvg "other/grad1.svg" $ mempty & #svgOptions % #svgHeight .~ 50 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart 0.1 100 (Colour 0.02 0.4 0.7 1) (Colour 1 1 1 1))
-#+end_src
-
-#+RESULTS:
-[[file:other/grad1.svg]]
-
-** default single
-
-
-#+begin_src haskell
-c = [2,219,240] :: Array '[3] Word8
-lum0 = 0.5
-sat0 = 0.15
-hue0 = 0
-cLum = greys c
-cChroma = chroma lum0 c
-cHue = hues lum0 sat0 c
-cSat = sats lum0 hue0 c
-#+end_src
-
-fade to grey with constant luminance:
-
-#+begin_src haskell :file other/single1.svg :results output graphics file :exports results
-writeChartSvg "other/single1.svg" $ mempty & #svgOptions % #svgHeight .~ 30 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart 0.1 10 (rgbw2colour c) (rgbw2colour cLum))
-#+end_src
-
-#+RESULTS:
-[[file:other/single1.svg]]
-
-Shift luminance with constant Chroma
-
-#+begin_src haskell :file other/single2.svg :results output graphics file :exports results
-writeChartSvg "other/single2.svg" $ mempty & #svgOptions % #svgHeight .~ 30 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart 0.1 10 (rgbw2colour c) (rgbw2colour cChroma))
-#+end_src
-
-#+RESULTS:
-[[file:other/single2.svg]]
-
-luminance from 0 to 1
-
-#+begin_src haskell :file other/single3.svg :results output graphics file :exports results
-c = [2,219,240] :: Array '[3] Word8
-lch = rgbw2oklch c
-lum' = lch `index` [0]
-lch0 = [0, lch `index` [1], lch `index` [2]]
-lch1 = [1, lch `index` [1], lch `index` [2]]
-grain = 100
-d = 1 / fromIntegral grain
-h = 0.1
-writeChartSvg "other/single3.svg" $ mempty & #svgOptions % #svgHeight .~ 30 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChartOk h grain lch0 lch1) <> named "original" [chartOk (Rect (lum' - d/2) (lum' + d/2) (-0.15/2) (0.15/2)) lch]
-#+end_src
-
-#+RESULTS:
-[[file:other/single3.svg]]
-
-sat from 0 to ...
-
-#+begin_src haskell :file other/singleSat.svg :results output graphics file :exports results
-c = [2,219,240] :: Array '[3] Word8
-lch = rgbw2oklch c
-maxsat' = 0.2
-sat' = lch `index` [1]
-lch0 = [lch `index` [0], 0, lch `index` [2]]
-lch1 = [lch `index` [0], maxsat', lch `index` [2]]
-grain = 100
-d = 1 / fromIntegral grain
-h = 0.1
-writeChartSvg "other/singleSat.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChartOk h grain lch0 lch1) <> named "original" [chartOk (Rect (sat' - 0.02) (sat' + 0.02) (-0.15/2) (0.15/2)) lch]
-#+end_src
-
-#+RESULTS:
-[[file:other/singleSat.svg]]
-
-
-hue rotation
-
-#+begin_src haskell :file other/singleHue.svg :results output graphics file :exports results
-c = [2,219,240] :: Array '[3] Word8
-lch = rgbw2oklch c
-hue' = lch `index` [2]
-lch0 = [lch `index` [0], lch `index` [1], 0]
-lch1 = [lch `index` [0], lch `index` [1], 360]
-grain = 100
-d = 1 / fromIntegral grain
-h = 0.1
-writeChartSvg "other/singleHue.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChartOk h grain lch0 lch1)
-#+end_src
-
-#+RESULTS:
-[[file:other/singleHue.svg]]
-
-
-#+begin_src haskell :results output html :exports results
-putStrLn $ unpack $ showSwatch c
-putStrLn $ unpack $ showSwatch $ greys c
-putStrLn $ unpack $ showSwatch $ chroma lum0 c
-putStrLn $ unpack $ showSwatch $ hues lum0 sat0 c
-putStrLn $ unpack $ showSwatch $ sats lum0 hue0 c
-#+end_src
-
-#+RESULTS:
-#+begin_export html
-<div class=swatch style="background:rgb(2 219 240);"></div>
-<div class=swatch style="background:rgb(194 194 194);"></div>
-<div class=swatch style="background:rgb(0 119 139);"></div>
-<div class=swatch style="background:rgb(0 120 142);"></div>
-<div class=swatch style="background:rgb(159 57 96);"></div>
-#+end_export
-
-** combo'
+** alternative combo
 
 #+begin_src haskell
 cs' =  [[180,4,243], [42,17,160], [231,224,0], [212,173,0]] :: [Array '[3] Word8]
@@ -238,13 +129,131 @@ putStrLn $ unpack $ showSwatches "" $ sats lum hue0 <$> cs'
 </div>
 #+end_export
 
-#+begin_src haskell :file other/combo.svg :results output graphics file :exports both
-writeChartSvg "other/combo.svg" $ mempty & #hudOptions .~ defaultHudOptions & #charts .~ named "dots" (dot' <$> cs') <> named "wheel" (((\(p,c) -> GlyphChart (defaultGlyphStyle & #size .~ 0.01 & #color .~ c & #borderSize .~ 0) [p]) <$> (filter (validColour . snd) (wheel 20 0.8 0.3))))
+#+begin_src haskell :file other/comboalt.svg :results output graphics file :exports both
+writeChartSvg "other/comboalt.svg" $ mempty & #hudOptions .~ defaultHudOptions & #charts .~ named "dots" (dot' <$> cs') <> named "wheel" (((\(p,c) -> GlyphChart (defaultGlyphStyle & #size .~ 0.01 & #color .~ c & #borderSize .~ 0) [p]) <$> (filter (validColour . snd) (wheel 20 0.8 0.3))))
 #+end_src
 
 #+RESULTS:
-[[file:other/combo.svg]]
+[[file:other/comboalt.svg]]
 
+** gradient
+
+#+begin_src haskell :file other/grad1.svg :results output graphics file :exports both
+c0 = [2,75,120] :: Array '[3] Word8
+c1 = [186,88,0] :: Array '[3] Word8
+ writeChartSvg "other/grad1.svg" $ mempty & #svgOptions % #svgHeight .~ 50 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart 0.1 100 (rgbw2colour c0) (rgbw2colour c1))
+#+end_src
+
+#+RESULTS:
+[[file:other/grad1.svg]]
+
+** ToDo varying lch
+
+#+begin_src haskell :results output
+c = [186,88,0] :: Array '[3] Word8
+ok = Oklcha' (Oklch' (rgbw2oklch c)) 1
+chroma0 = ok & lch' % c' .~ 0
+print ok
+#+end_src
+
+#+RESULTS:
+:
+: > > Oklcha' {lch = Oklch' {oklchArray = [0.5701403615841459, 0.14852717248942346, 51.02142232578221]}, lcha = 1.0}
+
+#+begin_src haskell :results output graphics file :exports results
+:r
+#+end_src
+
+#+begin_src haskell :file other/togrey.svg :results output graphics file :exports results
+writeChartSvg "other/togrey.svg" $ gradient "fade to grey with constant lightness and hue" 200 0.1 (Range (view (lch' % c') ok) 0) 20 ok chroma0
+#+end_src
+
+#+RESULTS:
+[[file:other/togrey.svg]]
+
+
+fade to grey with constant luminance:
+
+#+begin_src haskell :file other/togrey2.svg :results output graphics file :exports results
+writeChartSvg "other/togrey2.svg" $ mempty & #svgOptions % #svgHeight .~ 200 & #svgOptions % #cssOptions % #shapeRendering .~ UseCssCrisp & #hudOptions .~ (defaultHudOptions & #chartAspect .~ ChartAspect & #titles .~ [(10, defaultTitle "fade to grey with constant luminance" & #style % #size .~ 0.03 & #style % #color .~ oklch2colour lch 1) ] & #axes .~ [(5, defaultAxisOptions & #ticks % #style .~ TickRound (FormatFixed (Just 2)) 4 TickExtend & #ticks % #ltick .~ Nothing & #bar .~ Nothing & #ticks % #gtick %~ fmap (bimap ((#borderSize .~ 0.002) . (#color .~ white) . (#size .~ 0.02)) (const 0)) & #ticks % #ttick %~ fmap (bimap ((#size .~ 0.02) . (#color .~ white)) (const 0.01)))]) & #charts .~ named "gradient" (gradientChartOk 0.1 20 lch (oklch2l lch)) & #hudOptions % #frames .~ [(20, FrameOptions (Just (border 0.001 white)) 0.02)]
+#+end_src
+
+#+RESULTS:
+[[file:other/togrey2.svg]]
+
+
+Shift luminance with constant Chroma
+
+#+begin_src haskell :file other/gchroma.svg :results output graphics file :exports results
+writeChartSvg "other/gchroma.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart 0.1 100 (rgbw2colour c) (rgbw2colour cChroma))
+#+end_src
+
+#+RESULTS:
+[[file:other/gchroma.svg]]
+
+#+begin_src haskell :file other/gchroma2.svg :results output graphics file :exports results
+writeChartSvg "other/gchroma2.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart_ 0.1 100 (rgbw2colour c) (rgbw2colour cChroma))
+#+end_src
+
+#+RESULTS:
+[[file:other/gchroma2.svg]]
+
+
+
+luminance from 0 to 1
+
+#+begin_src haskell :file other/single3.svg :results output graphics file :exports results
+lch = rgbw2oklch c
+lum' = lch `index` [0]
+lch0 = [0, lch `index` [1], lch `index` [2]]
+lch1 = [1, lch `index` [1], lch `index` [2]]
+grain = 100
+d = 1 / fromIntegral grain
+h = 0.1
+writeChartSvg "other/single3.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChartOk h grain lch0 lch1) <> named "border" [borderStrip 0.002 white (Rect (lum' - d/2) (lum' + d/2) (-0.15/2) (0.15/2))]
+#+end_src
+
+#+RESULTS:
+[[file:other/single3.svg]]
+
+sat from 0 to ...
+
+#+begin_src haskell :file other/singleSat.svg :results output graphics file :exports results
+lch = rgbw2oklch c
+maxsat' = 0.33
+sat' = lch `index` [1]
+lch0 = [lch `index` [0], 0, lch `index` [2]]
+lch1 = [lch `index` [0], maxsat', lch `index` [2]]
+grain = 100
+d = 1 / fromIntegral grain
+h = 0.1
+writeChartSvg "other/singleSat.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChartOk h grain lch0 lch1) <> named "original" [borderStrip 0.002 white (Rect (sat' - 0.02) (sat' + 0.02) (-0.15/2) (0.15/2))]
+#+end_src
+
+#+RESULTS:
+[[file:other/singleSat.svg]]
+
+
+hue rotation
+
+#+begin_src haskell :file other/singleHue.svg :results output graphics file :exports results
+lch = rgbw2oklch c
+hue' = lch `index` [2]
+lch0 = [lch `index` [0], lch `index` [1], 0]
+lch1 = [lch `index` [0], lch `index` [1], 360]
+grain = 100
+d = 1 / fromIntegral grain
+h = 0.1
+writeChartSvg "other/singleHue.svg" $ mempty & #svgOptions % #svgHeight .~ 100 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChartOk h grain lch0 lch1) <> named "original" [borderStrip 0.002 white (Rect (sat' - 0.02) (sat' + 0.02) (-0.15/2) (0.15/2))]
+#+end_src
+
+#+RESULTS:
+[[file:other/singleHue.svg]]
+
+** ToDo swatches
+#+begin_src haskell :results output html :exports both
+putStrLn $ unpack $ showSwatches "decomposition" [c, greys c, chroma lum0 c, hues lum0 sat0 c, sats lum0 hue0 c]
+#+end_src
 ** color wheel
 
 reference: https://observablehq.com/@fil/oklab-color-space
@@ -280,8 +289,7 @@ oklch
 | c       | [0, 0.322]≈ | Chroma      |
 | h       | [0, 360)    | Hue         |
 
-** Haskell
-*** setup
+** bootup
 
 #+begin_src haskell :results value
 :set prompt "> "
@@ -293,16 +301,17 @@ oklch
 :set -XFlexibleContexts
 :set -XGADTs
 :set -XDataKinds
-:load src/Data/Colour/Adjust.hs
+-- :load src/Data/Colour/Adjust.hs
 #+end_src
 
 #+begin_src haskell
 import qualified Graphics.Color.Space as S
-import Data.Text (Text)
+import Data.Text (Text, pack, unpack)
 import Chart
 import Data.Colour.Adjust
 import Optics.Core
 import Graphics.Color.Model as M hiding (one)
+import Data.Bifunctor
 #+end_src
 
 #+RESULTS:
@@ -317,90 +326,6 @@ putStrLn x
 #+RESULTS:
 : ok
 
-*** color conversion
-
-#+begin_src haskell
-xyz1 = hex2xyz "#02DBF0"
-S.fromColorXYZ xyz1 :: Color (S.SRGB 'S.NonLinear) Double
-#+end_src
-
-#+RESULTS:
-: <SRGB 'NonLinear:( 0.0081038092138417, 0.8588351697607257, 0.9411819663894760)>
-
-
-
-
-#+begin_src haskell :results output :exports both
-rgbi2luv 200 200 200
-rgbi2luv 0 0 200
-#+end_src
-
-#+RESULTS:
-: <LUV * D65:(90.8369134605712200, 0.0124031462541918, 0.0037174451044090)>
-: <LUV * D65:(28.4870626869885650,-8.2859360809530140,-114.9546652999056100)>
-
-#+begin_src haskell
-convert (S.mkColorRGB $ unsafeFromHex "#121212" :: Color (S.SRGB 'S.Linear) Double) :: Color (LUV.LUV S.D65) Double
-#+end_src
-
-#+RESULTS:
-: <LUV * D65:(31.9404490247319760, 0.0043612452866247, 0.0013071433334330)>
-
-
-#+begin_src haskell
-luv2rgb 85 (-14) (-30)
-#+end_src
-
-#+RESULTS:
-: <RGB:( 0.5164515574172603, 0.6749080154141279, 0.9363589261483973)>
-
-#+begin_src haskell
-rgbi2rgb 18 18 18
-#+end_src
-
-#+RESULTS:
-: <RGB:( 0.0703125000000000, 0.0703125000000000, 0.0703125000000000)>
-
-
-#+begin_src haskell :results output :exports both
-rgbi2luv 0 0 255
-#+end_src
-
-#+RESULTS:
-: <LUV * D65:(32.2396106027892400,-9.3774270680262570,-130.0974300848391500)>
-
-#+begin_src haskell :results output :exports both
-luv2rgb 32.2 (-9.38) (-130.10)
-#+end_src
-
-#+RESULTS:
-: <RGB:(-0.0002633671741094,-0.0002687954995931, 0.9970731235971670)>
-
-#+begin_src haskell :results output html :exports both
-sequence_ $ (putStrLn . unpack) <$> [luv2span 32 0 0, luv2span 32 (-9) (-130), luv2span 32 (-4.5) (-65), luv2span 32 (-4.5) (-22), luv2span 32 (-2) (-12), luv2span 95 (-4) (-12)]
-#+end_src
-
-#+RESULTS:
-#+begin_export html
-<span style="color:rgb(18,18,18);">⬤</span>
-<span style="color:rgb(0,-1,255);">⬤</span>
-<span style="color:rgb(13,13,77);">⬤</span>
-<span style="color:rgb(14,17,33);">⬤</span>
-<span style="color:rgb(16,17,25);">⬤</span>
-<span style="color:rgb(212,224,256);">⬤</span>
-#+end_export
-
-<span style="color:#121212;">⬤</span>
-
-*** random colors
-
-#+begin_src haskell :file other/cs.svg :results output graphics file :exports both
-cs = mempty & set #hudOptions (defaultHudOptions & set #chartAspect (FixedAspect 1)) & set #charts (named "randos" (zipWith (\c x -> GlyphChart (defaultGlyphStyle & set #shape CircleGlyph & set #color c & set #borderSize 0 & set #size 0.25) [x]) (take 10000 $ (\(ColorRGB r g b) -> Colour r g b 1) <$> rRGBs) (grid InnerPos (Rect 0 1 0 1) (Point 4 4))))
-writeChartSvg "other/cs.svg" cs
-#+end_src
-
-#+RESULTS:
-[[file:other/cs.svg]]
 
 ** reference
 

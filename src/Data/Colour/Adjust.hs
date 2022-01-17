@@ -10,6 +10,8 @@
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 
 -- | Colour representations and combinations, based on <https://hackage.haskell.org/package/Color>
 module Data.Colour.Adjust
@@ -23,11 +25,10 @@ import System.Random.Stateful
 import qualified Graphics.Color.Space.CIE1976.LUV as LUV
 import Data.Bool (bool)
 import Data.Colour
-import Data.Text (Text, unpack, pack)
-import GHC.Generics
+import Data.Text (Text, pack)
+import GHC.Generics hiding (to, Rep)
 import NeatInterpolation
 import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
 import qualified Graphics.Color.Space.CIE1976.LUV.LCH as LUVLCH
 import Chart.Data
 import NumHask.Algebra.Metric
@@ -37,11 +38,161 @@ import GHC.Exts
 import Chart
 import Optics.Core
 import Data.Maybe
-import Control.Applicative
-import Control.Arrow
-import Control.Applicative
-import Control.Exception
-import Control.Monad.ST
+import Data.Bifunctor
+
+newtype Oklch = Oklch' { oklchArray :: Array '[3] Double } deriving (Eq, Show)
+
+pattern Oklch :: Double -> Double -> Double -> Oklch
+pattern Oklch l c h <- Oklch' [l,c,h] where
+  Oklch l c h = Oklch' [l,c,h]
+{-# COMPLETE Oklch #-}
+
+l' :: Lens' Oklch Double
+l' = lens (\(Oklch l _ _) -> l) (\(Oklch _ c h) l -> Oklch l c h)
+
+c' :: Lens' Oklch Double
+c' = lens (\(Oklch _ c _) -> c) (\(Oklch l _ h) c -> Oklch l c h)
+
+h' :: Lens' Oklch Double
+h' = lens (\(Oklch _ _ h) -> h) (\(Oklch l c _) h -> Oklch l c h)
+
+data Oklcha = Oklcha' { lch :: Oklch, lcha :: Double } deriving (Eq, Show)
+
+lch' :: Lens' Oklcha Oklch
+lch' = lens (\(Oklcha' lch _) -> lch) (\(Oklcha' _ a) lch -> Oklcha' lch a)
+
+lcha' :: Lens' Oklcha Double
+lcha' = lens (\(Oklcha' _ a) -> a) (\(Oklcha' lch _) a -> Oklcha' lch a)
+
+pattern Oklcha :: Double -> Double -> Double -> Double -> Oklcha
+pattern Oklcha l c h a <- Oklcha' (Oklch' [l,c,h]) a where
+  Oklcha l c h a = Oklcha' (Oklch' [l,c,h]) a
+{-# COMPLETE Oklcha #-}
+
+oklch' :: Iso' Oklcha Colour
+oklch' = iso toColour_ fromColour_
+
+(!) :: (Representable f, IsList (Rep f)) =>
+  f a -> Item (Rep f) -> a
+(!) xs i = xs `index` [i]
+
+toColour_ :: Oklcha -> Colour
+toColour_ (Oklcha' (Oklch' lch) a) = Colour (rgb!0) (rgb!1) (rgb!2) a
+  where
+    rgb = oklch2rgb__ lch
+
+fromColour_ :: Colour -> Oklcha
+fromColour_ (Colour r g b a) = Oklcha' (Oklch' lch) a
+  where
+    lch = rgb2oklch__ [r,g,b]
+
+toColourMaybe :: Oklcha -> Maybe Colour
+toColourMaybe ok = bool Nothing (Just c) (validColour c)
+  where
+    c = view oklch' ok
+
+validColour :: Colour -> Bool
+validColour (Colour r g b o) = r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1 && o >= 0 && o <= 1
+
+-- >>> oklch2rgb  [0.5968470888515913, 0.1562144161795396, 49.76230756891311]
+-- [0.7760971665842135, 0.36342661872470994, 2.451958871169441e-2]
+oklch2rgb__ :: Array '[3] Double -> Array '[3] Double
+oklch2rgb__ = xyz2rgb' . oklab2xyz . oklch2oklab
+
+rgb2oklch__ :: Array '[3] Double -> Array '[3] Double
+rgb2oklch__ = oklab2oklch . xyz2oklab . rgb2xyz'
+
+blendWithOk :: Double -> Colour -> Colour -> Colour
+blendWithOk x c0 c1 = view oklch' (blendOklcha x (review oklch' c0) (review oklch' c1))
+
+blendWithOkMaybe :: Double -> Colour -> Colour -> Maybe Colour
+blendWithOkMaybe x c0 c1 = bool Nothing (Just c) (validColour c)
+  where
+    c = blendWithOk x c0 c1
+
+blendOklcha :: Double -> Oklcha -> Oklcha -> Oklcha
+blendOklcha x (Oklcha l c h a) (Oklcha l' c' h' a') = Oklcha l'' c'' h'' a''
+  where
+    l'' = l + x * (l' - l)
+    c'' = c + x * (c' - c)
+    h'' = h + x * (h' - h)
+    a'' = a + x * (a' - a)
+
+blendOklch :: Double -> Oklch -> Oklch -> Oklch
+blendOklch x (Oklch l c h) (Oklch l' c' h') = Oklch l'' c'' h''
+  where
+    l'' = l + x * (l' - l)
+    c'' = c + x * (c' - c)
+    h'' = h + x * (h' - h)
+
+gradientChart :: Double -> Range Double -> Int -> Colour -> Colour -> [Chart]
+gradientChart y r grain c0 c1 =
+  (\(r,c) -> RectChart (defaultRectStyle & #color .~ c & #borderSize .~ 0) [r]) .
+  (\x -> (Rect x (x+d) (-y/2) (y/2), blendWithOk x c0 c1)) <$>
+  grid LowerPos r grain
+  where
+    d = 1 / fromIntegral grain
+
+gradientChartMaybe :: Double -> Range Double -> Int -> Colour -> Colour -> [Chart]
+gradientChartMaybe y r grain c0 c1 = mconcat $
+  (\(r,c) -> [RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]]) .
+  (\x -> (Rect x (x+d) (-y/2) (y/2), blendWithOkMaybe x c0 c1)) <$>
+  grid LowerPos r grain
+  where
+    d = 1 / fromIntegral grain
+
+gradientChartOk :: Double -> Range Double -> Int -> Oklcha -> Oklcha -> [Chart]
+gradientChartOk y r grain c0 c1 =
+  (\(r,c) -> RectChart (defaultRectStyle & #color .~ c & #borderSize .~ 0) [r]) .
+  (\x -> (Rect x (x+d) (-y/2) (y/2), view oklch' (blendOklcha x c0 c1))) <$>
+  grid LowerPos r grain
+  where
+    d = 1 / fromIntegral grain
+
+gradientChartOkMaybe :: Double -> Int -> Oklcha -> Oklcha -> [Chart]
+gradientChartOkMaybe y grain c0 c1 =
+  (\(r,c) -> RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]) .
+  (\x -> (Rect x (x+d) (-y/2) (y/2), toColourMaybe (blendOklcha x c0 c1))) <$>
+  grid LowerPos (Range 0 1) grain
+  where
+    d = 1 / fromIntegral grain
+
+gradient :: Text -> Text -> Double -> Double -> Range Double -> Int -> Oklcha -> Oklcha -> ChartSvg
+gradient label labelx h y r grain ok0 ok1 =
+  mempty &
+  #svgOptions % #svgHeight .~ h &
+  #svgOptions % #cssOptions % #shapeRendering .~ UseCssCrisp &
+  #hudOptions .~
+  ( defaultHudOptions &
+    #chartAspect .~ ChartAspect &
+    #titles .~
+    [(10, defaultTitle label &
+       #style % #size .~ 0.015),
+      (10, defaultTitle labelx &
+       #style % #size .~ 0.015 &
+        #place .~ PlaceBottom)] &
+    #axes .~
+    [(5, defaultAxisOptions &
+         #ticks % #style .~ TickRound (FormatFixed (Just 2)) 4 TickExtend &
+         #ticks % #ltick .~ Nothing &
+         #bar .~ Nothing &
+         #ticks % #gtick %~
+         fmap (bimap
+                ((#borderSize .~ 0.002) .
+                  (#color .~ dark) .
+                  (#size .~ 0.02)) (const 0)) &
+         #ticks % #ttick %~
+         fmap (bimap
+               ((#size .~ 0.02) .
+                (#color .~ white))
+                (const 0.01)))] &
+    #frames .~ [(20, FrameOptions (Just (border 0.001 white)) 0.02)]) &
+  #charts .~ named "gradient" (gradientChartOk y r grain ok0 ok1)
+
+gradGrey :: Oklcha -> ChartSvg
+gradGrey ok =
+  gradient "fade to grey with constant lightness and hue" "chroma" 200
+  0.1 (Range (view (lch' % c') ok) 0) 20 ok (ok & lch' % c' .~ 0)
 
 instance (Elevator e, UniformRange e) => Uniform (Color (S.XYZ i) e)
   where
@@ -279,10 +430,6 @@ m2' = [ 0.99999999845051981432, 0.39633779217376785678, 0.21580375806075880339,
         1.0000000546724109177, -0.089484182094965759684, -1.2914855378640917399
       ]
 
-x1 x = case x of
-  "hello" -> True
-
-
 
 -- convert from oklab to xyz
 -- >>> oklab2xyz [1,0,0]
@@ -375,6 +522,9 @@ rgbw2oklch w = rgb2oklch ((\x -> fromIntegral x/256.0) <$> w)
 oklch2greyscale :: Array '[3] Double -> Array '[3] Double
 oklch2greyscale a = oklch2rgb $ fromList [a `index` [0], 0, 0]
 
+oklch2l :: Array '[3] Double -> Array '[3] Double
+oklch2l a = fromList [a `index` [0], 0, a `index` [2]]
+
 rgb2rgbw :: Array '[3] Double -> Array '[3] Word8
 rgb2rgbw = fmap (floor . (256*))
 
@@ -399,49 +549,19 @@ oklch2hue l sat a = oklch2rgb $ fromList [l, sat, a `index` [2]]
 wheel :: Int -> Double -> Double -> [(Point Double, Colour)]
 wheel grain l maxsat = (\(Point sat hue) -> (uncurry Point $ ch2xy (sat,hue), (\a -> Colour (a `index` [0]) (a `index` [1]) (a `index` [2]) 1) $ oklch2rgb (fromList [l,sat,hue]))) <$> grid LowerPos (Rect 0 maxsat 0 360) (Point grain grain)
 
-gradientChart :: Double -> Int -> Colour -> Colour -> [Chart]
-gradientChart y grain c0 c1 =
-  (\(r,c) -> RectChart (defaultRectStyle & #color .~ c & #borderSize .~ 0) [r]) .
-  (\x -> (Rect (x - d/2) (x+d/2) (-y/2) (y/2), blendc x c0 c1)) <$>
-  grid LowerPos (Range 0 1) grain
+borderStrip :: Double -> Colour -> Rect Double -> Chart
+borderStrip w c r = RectChart (defaultRectStyle & #color .~ transparent & #borderSize .~ w & #borderColor .~ c) [r]
+
+oklch2colour :: Array '[3] Double -> Double -> Colour
+oklch2colour c = Colour (c' `index` [0]) (c' `index` [1]) (c' `index` [2])
   where
-    d = 1 / fromIntegral grain
+    c' = oklch2rgb c
 
-
-gradientChartOk :: Double -> Int -> Array '[3] Double -> Array '[3] Double -> [Chart]
-gradientChartOk y grain c0 c1 =
-  (\(r,c) -> RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]) .
-  (\x -> (Rect (x - d/2) (x+d/2) (-y/2) (y/2), rgb2Colour <$> oklch2rgb_ (blendOklch x c0 c1))) <$>
-  grid LowerPos (Range 0 1) grain
+oklch2colour_ :: Array '[3] Double -> Double -> Maybe Colour
+oklch2colour_ c a = (\x -> Colour (x `index` [0]) (x `index` [1]) (x `index` [2]) a) <$> c'
   where
-    d = 1 / fromIntegral grain
+    c' = oklch2rgb_ c
 
-chartOk :: Rect Double -> Array '[3] Double -> Chart
-chartOk r c = RectChart (defaultRectStyle & #color .~ transparent & #borderSize .~ 0.02 & #borderColor .~ Colour 0 0 0 1) [r]
-
-gridc :: Int -> Colour -> Colour -> [Colour]
-gridc n c0 c1 = (\x -> blendc x c0 c1) <$> grid OuterPos (Range 0 1) n
-
-blendc :: Double -> Colour -> Colour -> Colour
-blendc x (Colour r g b a) (Colour r' g' b' a') = Colour (c' `index` [0]) (c' `index` [1]) (c' `index` [2]) a''
-  where
-    c0 = rgb2oklch [r,g,b]
-    c1 = rgb2oklch [r',g',b']
-    a'' = a + x * (a' - a)
-    l' = c0 `index` [0] + x * (c1 `index` [0] - c0 `index` [0])
-    s' = c0 `index` [1] + x * (c1 `index` [1] - c0 `index` [1])
-    h' = c0 `index` [2] + x * (c1 `index` [2] - c0 `index` [2])
-    c' = oklch2rgb [l',s',h']
-
-blendOklch :: Double -> Array '[3] Double -> Array '[3] Double -> Array '[3] Double
-blendOklch x c0 c1 = fromList [l',s',h']
-  where
-    l' = c0 `index` [0] + x * (c1 `index` [0] - c0 `index` [0])
-    s' = c0 `index` [1] + x * (c1 `index` [1] - c0 `index` [1])
-    h' = c0 `index` [2] + x * (c1 `index` [2] - c0 `index` [2])
-
-validColour :: Colour -> Bool
-validColour (Colour r g b o) = r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1 && o >= 0 && o <= 1
 
 rgb2Colour :: Array '[3] Double -> Colour
 rgb2Colour a = Colour (a `index` [0]) (a `index` [1]) (a `index` [2]) 1
@@ -463,3 +583,4 @@ rgb2colour a = Colour (a `index` [0]) (a `index` [1]) (a `index` [2]) 1
 
 rgbw2colour :: Array '[3] Word8 -> Colour
 rgbw2colour = rgb2colour . rgbw2rgb
+
