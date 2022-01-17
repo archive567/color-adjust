@@ -38,7 +38,6 @@ import GHC.Exts
 import Chart
 import Optics.Core
 import Data.Maybe
-import Data.Bifunctor
 
 newtype Oklch = Oklch' { oklchArray :: Array '[3] Double } deriving (Eq, Show)
 
@@ -125,74 +124,51 @@ blendOklch x (Oklch l c h) (Oklch l' c' h') = Oklch l'' c'' h''
     c'' = c + x * (c' - c)
     h'' = h + x * (h' - h)
 
-gradientChart :: Double -> Range Double -> Int -> Colour -> Colour -> [Chart]
-gradientChart y r grain c0 c1 =
+gradientChart :: Int -> Colour -> Colour -> [Chart]
+gradientChart grain c0 c1 =
   (\(r,c) -> RectChart (defaultRectStyle & #color .~ c & #borderSize .~ 0) [r]) .
-  (\x -> (Rect x (x+d) (-y/2) (y/2), blendWithOk x c0 c1)) <$>
-  grid LowerPos r grain
-  where
-    d = 1 / fromIntegral grain
-
-gradientChartMaybe :: Double -> Range Double -> Int -> Colour -> Colour -> [Chart]
-gradientChartMaybe y r grain c0 c1 = mconcat $
-  (\(r,c) -> [RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]]) .
-  (\x -> (Rect x (x+d) (-y/2) (y/2), blendWithOkMaybe x c0 c1)) <$>
-  grid LowerPos r grain
-  where
-    d = 1 / fromIntegral grain
-
-gradientChartOk :: Double -> Range Double -> Int -> Oklcha -> Oklcha -> [Chart]
-gradientChartOk y r grain c0 c1 =
-  (\(r,c) -> RectChart (defaultRectStyle & #color .~ c & #borderSize .~ 0) [r]) .
-  (\x -> (Rect x (x+d) (-y/2) (y/2), view oklch' (blendOklcha x c0 c1))) <$>
-  grid LowerPos r grain
-  where
-    d = 1 / fromIntegral grain
-
-gradientChartOkMaybe :: Double -> Int -> Oklcha -> Oklcha -> [Chart]
-gradientChartOkMaybe y grain c0 c1 =
-  (\(r,c) -> RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]) .
-  (\x -> (Rect x (x+d) (-y/2) (y/2), toColourMaybe (blendOklcha x c0 c1))) <$>
+  (\x -> (Rect x (x+d) 0 1, blendWithOk x c0 c1)) <$>
   grid LowerPos (Range 0 1) grain
   where
     d = 1 / fromIntegral grain
 
-gradient :: Text -> Text -> Double -> Double -> Range Double -> Int -> Oklcha -> Oklcha -> ChartSvg
-gradient label labelx h y r grain ok0 ok1 =
+gradientChartMaybe :: Int -> Colour -> Colour -> [Chart]
+gradientChartMaybe grain c0 c1 = mconcat $
+  (\(r,c) -> [RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]]) .
+  (\x -> (Rect x (x+d) 0 1, blendWithOkMaybe x c0 c1)) <$>
+  grid LowerPos (Range 0 1) grain
+  where
+    d = 1 / fromIntegral grain
+
+gradientChartOk :: Int -> Oklcha -> Oklcha -> [Chart]
+gradientChartOk grain c0 c1 =
+  (\(r,c) -> RectChart (defaultRectStyle & #color .~ c & #borderSize .~ 0) [r]) .
+  (\x -> (Rect x (x+d) 0 1, view oklch' (blendOklcha x c0 c1))) <$>
+  grid LowerPos (Range 0 1) grain
+  where
+    d = 1 / fromIntegral grain
+
+gradientChartOkMaybe :: Int -> Oklcha -> Oklcha -> [Chart]
+gradientChartOkMaybe grain c0 c1 =
+  (\(r,c) -> RectChart (defaultRectStyle & #color .~ fromMaybe transparent c & #borderSize .~ 0) [r]) .
+  (\x -> (Rect x (x+d) 0 1, toColourMaybe (blendOklcha x c0 c1))) <$>
+  grid LowerPos (Range 0 1) grain
+  where
+    d = 1 / fromIntegral grain
+
+gradient :: Double -> Double -> Int -> Oklcha -> Oklcha -> ChartSvg
+gradient h fa grain ok0 ok1 =
   mempty &
   #svgOptions % #svgHeight .~ h &
   #svgOptions % #cssOptions % #shapeRendering .~ UseCssCrisp &
   #hudOptions .~
-  ( defaultHudOptions &
-    #chartAspect .~ ChartAspect &
-    #titles .~
-    [(10, defaultTitle label &
-       #style % #size .~ 0.015),
-      (10, defaultTitle labelx &
-       #style % #size .~ 0.015 &
-        #place .~ PlaceBottom)] &
-    #axes .~
-    [(5, defaultAxisOptions &
-         #ticks % #style .~ TickRound (FormatFixed (Just 2)) 4 TickExtend &
-         #ticks % #ltick .~ Nothing &
-         #bar .~ Nothing &
-         #ticks % #gtick %~
-         fmap (bimap
-                ((#borderSize .~ 0.002) .
-                  (#color .~ dark) .
-                  (#size .~ 0.02)) (const 0)) &
-         #ticks % #ttick %~
-         fmap (bimap
-               ((#size .~ 0.02) .
-                (#color .~ white))
-                (const 0.01)))] &
-    #frames .~ [(20, FrameOptions (Just (border 0.001 white)) 0.02)]) &
-  #charts .~ named "gradient" (gradientChartOk y r grain ok0 ok1)
+  ( mempty &
+    #chartAspect .~ FixedAspect fa &
+    #frames .~ [(20, FrameOptions (Just (border 0.004 white)) 0.1)]) &
+  #charts .~ named "gradient" (gradientChartOk grain ok0 ok1)
 
-gradGrey :: Oklcha -> ChartSvg
-gradGrey ok =
-  gradient "fade to grey with constant lightness and hue" "chroma" 200
-  0.1 (Range (view (lch' % c') ok) 0) 20 ok (ok & lch' % c' .~ 0)
+gradientb :: Double -> Double -> Double -> Int -> Oklcha -> Oklcha -> ChartSvg
+gradientb marker h fa grain ok0 ok1 = gradient h fa grain ok0 ok1 & #charts %~ (<> named "border" [borderStrip 0.02 white (Rect (marker - 0.02) (marker + 0.02) (-0.1) 1.1)])
 
 instance (Elevator e, UniformRange e) => Uniform (Color (S.XYZ i) e)
   where
