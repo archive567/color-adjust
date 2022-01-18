@@ -6,175 +6,187 @@
 :EXPORT_FILE_NAME: color-adjust
 :export_date: 2022-1-16
 :END:
-** default combo
+
+** setup
 
 #+begin_src haskell
-cs = [[2,219,240], [2,75,120], [255,181,91], [186,88,0]] :: [Array '[3] Word8]
-lum = 0.6
-sat0 = 0.2
-hue0 = 315
+:r
+:set prompt "> "
+:set -XOverloadedLists
+:set -XOverloadedStrings
+:set -XOverloadedLabels
+:set -Wno-name-shadowing
+:set -XTupleSections
+:set -Wno-type-defaults
+import Data.Word
+import qualified Data.Text as Text
+cws = [[2,219,240], [2,75,120], [255,181,91], [186,88,0]] :: [RGB3 Word8]
+cs = view rgb32colour' . (,1) . review rgbd' <$> cws
 print cs
 #+end_src
 
 #+RESULTS:
-: > > > [[2, 219, 240],[2, 75, 120],[255, 181, 91],[186, 88, 0]]
+: > > > > > > > > > > > [Colour 0.01 0.86 0.94 1.00,Colour 0.01 0.29 0.47 1.00,Colour 1.00 0.71 0.36 1.00,Colour 0.73 0.34 0.00 1.00]
 
-#+begin_src haskell :results output html :exports results
-putStrLn $ unpack $ showSwatches "" cs
-putStrLn $ unpack $ showSwatches "" $ greys <$> cs
-putStrLn $ unpack $ showSwatches "" $ chroma lum <$> cs
-putStrLn $ unpack $ showSwatches "" $ hues lum sat0 <$> cs
-putStrLn $ unpack $ showSwatches "" $ sats lum hue0 <$> cs
+** decomposing colors
+
+#+begin_src haskell :results output html :exports both
+pSwatch suff f xs = putStrLn $ Text.unpack $ showSwatches "" suff ((("",) . f) <$> xs)
+pSwatch "original" id cs
+pSwatch "greyed" greyed cs
+pSwatch "lightness 0.5" (over lightness' (const 0.5)) cs
+pSwatch "l=0.5, chroma=0.15" (over lightness' (const 0.5) . over chroma' 0.15) cs
+pSwatch "l=0.75, hue=20" (over lightness' (const 0.75) . over hue' 20) cs
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<div>
-<div class=swatch style="background:rgb(2 219 240);">(2 219 240)</div>
-<div class=swatch style="background:rgb(2 75 120);">(2 75 120)</div>
-<div class=swatch style="background:rgb(255 181 91);">(255 181 91)</div>
-<div class=swatch style="background:rgb(186 88 0);">(186 88 0)</div>
 
+<div>
+
+<div class=swatch style="background:rgba(1%, 86%, 94%, 1.00);"></div>
+<div class=swatch style="background:rgba(1%, 29%, 47%, 1.00);"></div>
+<div class=swatch style="background:rgba(100%, 71%, 36%, 1.00);"></div>
+<div class=swatch style="background:rgba(73%, 34%, 0%, 1.00);"></div>
+original
 </div>
 <div>
-<div class=swatch style="background:rgb(194 194 194);">(194 194 194)</div>
-<div class=swatch style="background:rgb(71 71 71);">(71 71 71)</div>
-<div class=swatch style="background:rgb(197 197 197);">(197 197 197)</div>
-<div class=swatch style="background:rgb(119 119 119);">(119 119 119)</div>
 
+<div class=swatch style="background:rgba(76%, 76%, 76%, 1.00);"></div>
+<div class=swatch style="background:rgba(28%, 28%, 28%, 1.00);"></div>
+<div class=swatch style="background:rgba(77%, 77%, 77%, 1.00);"></div>
+<div class=swatch style="background:rgba(47%, 47%, 47%, 1.00);"></div>
+greyed
 </div>
 <div>
-<div class=swatch style="background:rgb(0 150 170);">(0 150 170)</div>
-<div class=swatch style="background:rgb(73 134 183);">(73 134 183)</div>
-<div class=swatch style="background:rgb(179 110 0);">(179 110 0)</div>
-<div class=swatch style="background:rgb(196 97 21);">(196 97 21)</div>
 
+<div class=swatch style="background:rgba(-89%, 47%, 55%, 1.00);"></div>
+<div class=swatch style="background:rgba(17%, 41%, 59%, 1.00);"></div>
+<div class=swatch style="background:rgba(58%, 32%, -25%, 1.00);"></div>
+<div class=swatch style="background:rgba(63%, 26%, -15%, 1.00);"></div>
+lightness 0.5
 </div>
 <div>
-<div class=swatch style="background:rgb(0 156 188);">(0 156 188)</div>
-<div class=swatch style="background:rgb(0 133 237);">(0 133 237)</div>
-<div class=swatch style="background:rgb(201 96 0);">(201 96 0)</div>
-<div class=swatch style="background:rgb(215 78 0);">(215 78 0)</div>
 
+<div class=swatch style="background:rgba(-105%, 47%, 56%, 1.00);"></div>
+<div class=swatch style="background:rgba(-26%, 41%, 70%, 1.00);"></div>
+<div class=swatch style="background:rgba(59%, 30%, -36%, 1.00);"></div>
+<div class=swatch style="background:rgba(64%, 26%, -16%, 1.00);"></div>
+l=0.5, chroma=0.15
 </div>
 <div>
-<div class=swatch style="background:rgb(159 100 185);">(159 100 185)</div>
-<div class=swatch style="background:rgb(150 110 169);">(150 110 169)</div>
-<div class=swatch style="background:rgb(158 101 183);">(158 101 183)</div>
-<div class=swatch style="background:rgb(161 97 188);">(161 97 188)</div>
 
+<div class=swatch style="background:rgba(98%, 53%, 54%, 1.00);"></div>
+<div class=swatch style="background:rgba(90%, 58%, 58%, 1.00);"></div>
+<div class=swatch style="background:rgba(97%, 54%, 54%, 1.00);"></div>
+<div class=swatch style="background:rgba(100%, 52%, 53%, 1.00);"></div>
+l=0.75, hue=20
 </div>
 #+end_export
 
+
 #+begin_src haskell :file other/combo.svg :results output graphics file :exports both
-writeChartSvg "other/combo.svg" $ mempty & #hudOptions .~ defaultHudOptions & #charts .~ named "dots" (dot' <$> cs) <> named "wheel" (((\(p,c) -> GlyphChart (defaultGlyphStyle & #size .~ 0.01 & #color .~ c & #borderSize .~ 0) [p]) <$> (filter (validColour . snd) (wheel 20 0.8 0.3))))
+writeChartSvg "other/combo.svg" (dotMap 0.01 50 0.3 0.5 cs)
 #+end_src
 
 #+RESULTS:
 [[file:other/combo.svg]]
-
-** alternative combo
+** alternative decomposing colors
 
 #+begin_src haskell
-cs' =  [[180,4,243], [42,17,160], [231,224,0], [212,173,0]] :: [Array '[3] Word8]
-lum = 0.7
-sat0 = 0.2
-hue0 = 0
+cws' =  [[180,4,243], [42,17,160], [231,224,0], [212,173,0]] :: [RGB3 Word8]
+cs' = view rgb32colour' . (,1) . review rgbd' <$> cws'
 #+end_src
 
-#+begin_src haskell :results output html :exports results
-putStrLn $ unpack $ showSwatches "" cs'
-putStrLn $ unpack $ showSwatches "" $ greys <$> cs'
-putStrLn $ unpack $ showSwatches "" $ chroma lum <$> cs'
-putStrLn $ unpack $ showSwatches "" $ hues lum sat0 <$> cs'
-putStrLn $ unpack $ showSwatches "" $ sats lum hue0 <$> cs'
+
+
+#+begin_src haskell :results output html :exports both
+pSwatch suff f xs = putStrLn $ Text.unpack $ showSwatches "" suff ((("",) . f) <$> xs)
+pSwatch "original" id cs'
+pSwatch "greyed" greyed cs'
+pSwatch "lightness 0.5" (over lightness' (const 0.5)) cs'
+pSwatch "l=0.5, chroma=0.15" (over lightness' (const 0.5) . over chroma' 0.15) cs'
+pSwatch "l=0.75, hue=20" (over lightness' (const 0.75) . over hue' 20) cs'
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<div>
-<div class=swatch style="background:rgb(180 4 243);">(180 4 243)</div>
-<div class=swatch style="background:rgb(42 17 160);">(42 17 160)</div>
-<div class=swatch style="background:rgb(231 224 0);">(231 224 0)</div>
-<div class=swatch style="background:rgb(212 173 0);">(212 173 0)</div>
 
+<div>
+
+<div class=swatch style="background:rgba(70%, 2%, 95%, 1.00);"></div>
+<div class=swatch style="background:rgba(16%, 7%, 62%, 1.00);"></div>
+<div class=swatch style="background:rgba(90%, 88%, 0%, 1.00);"></div>
+<div class=swatch style="background:rgba(83%, 68%, 0%, 1.00);"></div>
+original
 </div>
 <div>
-<div class=swatch style="background:rgb(123 123 123);">(123 123 123)</div>
-<div class=swatch style="background:rgb(58 58 58);">(58 58 58)</div>
-<div class=swatch style="background:rgb(216 216 216);">(216 216 216)</div>
-<div class=swatch style="background:rgb(177 177 176);">(177 177 176)</div>
 
+<div class=swatch style="background:rgba(48%, 48%, 48%, 1.00);"></div>
+<div class=swatch style="background:rgba(23%, 23%, 23%, 1.00);"></div>
+<div class=swatch style="background:rgba(85%, 85%, 85%, 1.00);"></div>
+<div class=swatch style="background:rgba(69%, 69%, 69%, 1.00);"></div>
+greyed
 </div>
 <div>
-<div class=swatch style="background:rgb(218 75 255);">(218 75 255)</div>
-<div class=swatch style="background:rgb(127 141 255);">(127 141 255)</div>
-<div class=swatch style="background:rgb(173 164 0);">(173 164 0)</div>
-<div class=swatch style="background:rgb(193 154 0);">(193 154 0)</div>
 
+<div class=swatch style="background:rgba(60%, -35%, 83%, 1.00);"></div>
+<div class=swatch style="background:rgba(29%, 30%, 83%, 1.00);"></div>
+<div class=swatch style="background:rgba(44%, 40%, -66%, 1.00);"></div>
+<div class=swatch style="background:rgba(51%, 37%, -48%, 1.00);"></div>
+lightness 0.5
 </div>
 <div>
-<div class=swatch style="background:rgb(200 114 246);">(200 114 246)</div>
-<div class=swatch style="background:rgb(127 141 255);">(127 141 255)</div>
-<div class=swatch style="background:rgb(174 164 0);">(174 164 0)</div>
-<div class=swatch style="background:rgb(202 151 0);">(202 151 0)</div>
 
+<div class=swatch style="background:rgba(50%, 27%, 63%, 1.00);"></div>
+<div class=swatch style="background:rgba(31%, 34%, 72%, 1.00);"></div>
+<div class=swatch style="background:rgba(43%, 40%, -40%, 1.00);"></div>
+<div class=swatch style="background:rgba(51%, 37%, -45%, 1.00);"></div>
+l=0.5, chroma=0.15
 </div>
 <div>
-<div class=swatch style="background:rgb(255 0 151);">(255 0 151)</div>
-<div class=swatch style="background:rgb(253 91 153);">(253 91 153)</div>
-<div class=swatch style="background:rgb(248 98 154);">(248 98 154)</div>
-<div class=swatch style="background:rgb(234 112 154);">(234 112 154)</div>
 
+<div class=swatch style="background:rgba(123%, 14%, 36%, 1.00);"></div>
+<div class=swatch style="background:rgba(109%, 43%, 47%, 1.00);"></div>
+<div class=swatch style="background:rgba(107%, 45%, 48%, 1.00);"></div>
+<div class=swatch style="background:rgba(101%, 51%, 52%, 1.00);"></div>
+l=0.75, hue=20
 </div>
 #+end_export
 
+
 #+begin_src haskell :file other/comboalt.svg :results output graphics file :exports both
-writeChartSvg "other/comboalt.svg" $ mempty & #hudOptions .~ defaultHudOptions & #charts .~ named "dots" (dot' <$> cs') <> named "wheel" (((\(p,c) -> GlyphChart (defaultGlyphStyle & #size .~ 0.01 & #color .~ c & #borderSize .~ 0) [p]) <$> (filter (validColour . snd) (wheel 20 0.8 0.3))))
+writeChartSvg "other/comboalt.svg" $ dotMap 0.01 20 0.8 0.4 cs
 #+end_src
 
 #+RESULTS:
 [[file:other/comboalt.svg]]
-
-** gradient
-
-#+begin_src haskell :file other/grad1.svg :results output graphics file :exports both
-c0 = [2,75,120] :: Array '[3] Word8
-c1 = [186,88,0] :: Array '[3] Word8
- writeChartSvg "other/grad1.svg" $ mempty & #svgOptions % #svgHeight .~ 50 & #hudOptions .~ (mempty & #chartAspect .~ ChartAspect) & #charts .~ named "gradient" (gradientChart 0.1 100 (rgbw2colour c0) (rgbw2colour c1))
-#+end_src
-
-#+RESULTS:
-[[file:other/grad1.svg]]
-
-** varying lch
+** gradient charts
 
 #+begin_src haskell :results output
-c = [186,88,0] :: Array '[3] Word8
-ok = Oklcha' (Oklch' (rgbw2oklch c)) 1
+c = [186,88,0] :: RGB3 Word8
+ok = view (re lcha2colour') $ view rgb32colour' . (,1) . review rgbd'$ c
 print ok
 #+end_src
 
 #+RESULTS:
 :
-: > Oklcha' {lch = Oklch' {oklchArray = [0.5701403615841459, 0.14852717248942346, 51.02142232578221]}, lcha = 1.0}
+: > LCHA' {_lch = LCH' {lchArray = [0.5701403615841459, 0.14852717248942346, 51.02142232578221]}, _alpha = 1.0}
 
 fade to white
 
 #+begin_src haskell :file other/towhite.svg :results output graphics file :exports results
-light0 = ok & lch' % l' .~ 1
-writeChartSvg "other/towhite.svg" $ gradient' 100 6 20 ok light0
+writeChartSvg "other/towhite.svg" $ gradient Nothing 100 6 100 ok (set (lch' % l') 1 ok)
 #+end_src
 
 #+RESULTS:
-[[file:other/toblack.svg]]
+[[file:other/towhite.svg]]
 
 
 fade to grey
 
 #+begin_src haskell :file other/togrey.svg :results output graphics file :exports results
-chroma0 = ok & lch' % c' .~ 0
-writeChartSvg "other/togrey.svg" $ gradient' 100 6 20 ok chroma0
+writeChartSvg "other/togrey.svg" $ gradient Nothing 100 6 100 ok (set (lch' % c') 0 ok)
 #+end_src
 
 #+RESULTS:
@@ -184,8 +196,7 @@ writeChartSvg "other/togrey.svg" $ gradient' 100 6 20 ok chroma0
 fade to hue=0
 
 #+begin_src haskell :file other/tohue0.svg :results output graphics file :exports results
-c0 = ok & lch' % h' .~ 0
-writeChartSvg "other/tohue0.svg" $ gradient' 100 6 20 ok c0
+writeChartSvg "other/tohue0.svg" $ gradient Nothing 100 6 100 ok (set (lch' % h') 0 ok)
 #+end_src
 
 #+RESULTS:
@@ -197,8 +208,7 @@ lightness 0 to 1
 c0 = ok & lch' % l' .~ 0
 c1 = ok & lch' % l' .~ 1
 lorig = view (lch' % l') ok
-writeChartSvg "other/lightness.svg" $ gradientb lorig 100 6 20 c0 c1
-
+writeChartSvg "other/lightness.svg" $ gradient (Just lorig) 100 6 100 c0 c1
 #+end_src
 
 #+RESULTS:
@@ -211,7 +221,7 @@ chroma 0 to 0.33
 c0 = ok & lch' % c' .~ 0
 c1 = ok & lch' % c' .~ 0.33
 orig = view (lch' % c') ok
-writeChartSvg "other/chroma.svg" $ gradientb orig 100 6 20 c0 c1
+writeChartSvg "other/chroma.svg" $ gradient (Just orig) 100 6 100 c0 c1
 
 #+end_src
 
@@ -225,7 +235,7 @@ hue 0 to 360
 c0 = ok & lch' % h' .~ 0
 c1 = ok & lch' % h' .~ 360
 orig = view (lch' % c') ok
-writeChartSvg "other/hue.svg" $ gradientb orig 100 6 20 c0 c1
+writeChartSvg "other/hue.svg" $ gradient (Just orig) 100 6 100 c0 c1
 
 #+end_src
 
@@ -237,18 +247,25 @@ writeChartSvg "other/hue.svg" $ gradientb orig 100 6 20 c0 c1
 reference: https://observablehq.com/@fil/oklab-color-space
 
 #+begin_src haskell :file other/wheel.svg :results output graphics file :exports both
-lum = 0.5
-writeChartSvg "other/wheel.svg" $ mempty & #hudOptions .~ defaultHudOptions & #charts .~ named "wheel" (((\(p,c) -> GlyphChart (defaultGlyphStyle & #size .~ 0.06 & #color .~ c & #borderSize .~ 0) [p]) <$> (filter (validColour . snd) (wheel 100 lum 0.4))))
+writeChartSvg "other/wheel.svg" (wheel 0.05 200 0.3 0.6)
 #+end_src
 
 #+RESULTS:
 [[file:other/wheel.svg]]
 
-** oklab
+** reference
+
+CSS colors are defined as [[https://en.wikipedia.org/wiki/SRGB][sRGB - Wikipedia]], with D65 illuminate
+
+- [[https://bottosson.github.io/posts/oklab/][A perceptual color space for image processing]]
+- [[https://www.w3.org/TR/css-color-5/#colorcontrast][CSS Color Module Level 5]]
+- [[https://www.w3.org/TR/css-color-4/#rgb-functions][CSS Color Module Level 4]]
+- [[https://www.w3.org/TR/css-color-3/][CSS Color Module Level 3]]
+- [[https://en.wikipedia.org/wiki/CIELAB_color_space][CIELAB color space - Wikipedia]]
+
+*** oklab
 
 [[file:///Users/tonyday/haskell/color-adjust/other/gradient.html][gradient]]
-
-[[https://bottosson.github.io/posts/oklab/][A perceptual color space for image processing]]
 
 oklab
 
@@ -265,52 +282,7 @@ oklch
 | l       | [0, 0.999]≈ | Lightness   |
 | c       | [0, 0.322]≈ | Chroma      |
 | h       | [0, 360)    | Hue         |
-
-** bootup
-
-#+begin_src haskell :results value
-:set prompt "> "
-:set -Wno-type-defaults
-:set -Wno-name-shadowing
-:set -XOverloadedStrings
-:set -XOverloadedLists
-:set -XOverloadedLabels
-:set -XFlexibleContexts
-:set -XGADTs
-:set -XDataKinds
-import qualified Graphics.Color.Space as S
-import Data.Text (Text, pack, unpack)
-import Chart
-import Data.Colour.Adjust
-import Optics.Core
-import Graphics.Color.Model as M hiding (one)
-import Data.Bifunctor
-#+end_src
-
-#+RESULTS:
-
-check
-
-#+BEGIN_SRC haskell :results value :export both
-let x = "ok"
-putStrLn x
-#+END_SRC
-
-#+RESULTS:
-: ok
-
-** reference
-
-CSS colors are defined as [[https://en.wikipedia.org/wiki/SRGB][sRGB - Wikipedia]], with D65 illuminate
-
-- [[https://en.wikipedia.org/wiki/Relative_luminance][Relative luminance - Wikipedia]]
-- [[https://en.wikipedia.org/wiki/Chromaticity][Chromaticity - Wikipedia]]
-- [[https://en.wikipedia.org/wiki/CIE_1931_color_space][CIE 1931 color space - Wikipedia]]
-- [[https://en.wikipedia.org/wiki/CIELAB_color_space][CIELAB color space - Wikipedia]]
-- [[https://www.w3.org/TR/css-color-5/#colorcontrast][CSS Color Module Level 5]]
-- [[https://www.w3.org/TR/css-color-4/#rgb-functions][CSS Color Module Level 4]]
-
-** style
+** css style
 
 <style>
 .swatch {

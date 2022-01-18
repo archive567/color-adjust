@@ -1,6 +1,7 @@
 packages:
   color-adjust.cabal
   ../chart-svg/chart-svg.cabal
+  ../formatn/formatn.cabal
 
 source-repository-package
   type: git
