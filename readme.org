@@ -242,6 +242,87 @@ writeChartSvg "other/hue.svg" $ gradient (Just orig) 100 6 100 c0 c1
 #+RESULTS:
 [[file:other/hue.svg]]
 
+** gradient charts
+
+#+begin_src haskell :results output
+c = [186,88,0] :: RGB3 Word8
+ok = view (re lcha2colour') $ view rgb32colour' . (,1) . review rgbd'$ c
+print ok
+#+end_src
+
+#+RESULTS:
+:
+: > LCHA' {_lch = LCH' {lchArray = [0.5701403615841459, 0.14852717248942346, 51.02142232578221]}, _alpha = 1.0}
+
+fade to white
+
+#+begin_src haskell :file other/towhite.svg :results output graphics file :exports results
+writeChartSvg "other/towhite.svg" $ gradient Nothing 100 6 100 ok (set (lch' % l') 1 ok)
+#+end_src
+
+#+RESULTS:
+[[file:other/towhite.svg]]
+
+
+fade to grey
+
+#+begin_src haskell :file other/togrey.svg :results output graphics file :exports results
+writeChartSvg "other/togrey.svg" $ gradient Nothing 100 6 100 ok (set (lch' % c') 0 ok)
+#+end_src
+
+#+RESULTS:
+[[file:other/togrey.svg]]
+
+
+fade to hue=0
+
+#+begin_src haskell :file other/tohue0.svg :results output graphics file :exports results
+writeChartSvg "other/tohue0.svg" $ gradient Nothing 100 6 100 ok (set (lch' % h') 0 ok)
+#+end_src
+
+#+RESULTS:
+[[file:other/tohue0.svg]]
+
+lightness 0 to 1
+
+#+begin_src haskell :file other/lightness.svg :results output graphics file :exports results
+c0 = ok & lch' % l' .~ 0
+c1 = ok & lch' % l' .~ 1
+lorig = view (lch' % l') ok
+writeChartSvg "other/lightness.svg" $ gradient (Just lorig) 100 6 100 c0 c1
+#+end_src
+
+#+RESULTS:
+[[file:other/lightness.svg]]
+
+
+chroma 0 to 0.33
+
+#+begin_src haskell :file other/chroma.svg :results output graphics file :exports results
+c0 = ok & lch' % c' .~ 0
+c1 = ok & lch' % c' .~ 0.33
+orig = view (lch' % c') ok
+writeChartSvg "other/chroma.svg" $ gradient (Just orig) 100 6 100 c0 c1
+
+#+end_src
+
+#+RESULTS:
+[[file:other/chroma.svg]]
+
+
+hue 0 to 360
+
+#+begin_src haskell :file other/hue.svg :results output graphics file :exports results
+c0 = ok & lch' % h' .~ 0
+c1 = ok & lch' % h' .~ 360
+orig = view (lch' % c') ok
+writeChartSvg "other/hue.svg" $ gradient (Just orig) 100 6 100 c0 c1
+
+#+end_src
+
+#+RESULTS:
+[[file:other/hue.svg]]
+
 ** color wheel
 
 reference: https://observablehq.com/@fil/oklab-color-space

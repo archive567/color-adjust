@@ -69,12 +69,13 @@ wheel :: Double -> Int -> Double -> Double -> ChartSvg
 wheel s grain l maxchroma =
   mempty &
   #hudOptions .~ defaultHudOptions &
-  #charts .~ named "wheel" (((\(p,c) -> GlyphChart
-                               (defaultGlyphStyle &
-                                #size .~ s &
-                                #color .~ c &
-                                #borderSize .~ 0) [p]) <$>
-                              filter (validColour . snd) (wheelPoints grain l maxchroma)))
+  #charts .~ named "wheel"
+    ((\(p,c) -> GlyphChart
+       (defaultGlyphStyle &
+        #size .~ s &
+        #color .~ c &
+        #borderSize .~ 0) [p]) <$>
+     filter (validColour . snd) (wheelPoints grain l maxchroma))
 
 -- | The dotMap
 --
