@@ -20,13 +20,139 @@
 :set -Wno-type-defaults
 import Data.Word
 import qualified Data.Text as Text
-cws = [[2,219,240], [2,75,120], [255,181,91], [186,88,0]] :: [RGB3 Word8]
-cs = view rgb32colour' . (,1) . review rgbd' <$> cws
-print cs
+import Data.Bifunctor
+#+end_src
+
+** palette1
+
+#+begin_src haskell
+x1 =[LCHA 0.72 0.123 207 1, LCHA 0.40 0.10 246 1, LCHA 0.50 0.21 338 1, LCHA 0.8 0.15 331 1, LCHA 0.83 0.14 69 1, LCHA 0.57 0.15 50 1, LCHA 0.38 0.085 128 1, LCHA 0.60 0.08 104 1] :: [LCHA]
+cs = trimColour <$> view lcha2colour' <$> x1
+csu = view lcha2colour' <$> x1
+print csu
 #+end_src
 
 #+RESULTS:
-: > > > > > > > > > > > [Colour 0.01 0.86 0.94 1.00,Colour 0.01 0.29 0.47 1.00,Colour 1.00 0.71 0.36 1.00,Colour 0.73 0.34 0.00 1.00]
+: > > [Colour 0.02 0.73 0.80 1.00,Colour 0.02 0.29 0.48 1.00,Colour 0.66 0.07 0.55 1.00,Colour 0.96 0.60 0.92 1.00,Colour 1.01 0.71 0.35 1.00,Colour 0.73 0.34 0.01 1.00,Colour 0.21 0.29 0.07 1.00,Colour 0.53 0.51 0.28 1.00]
+
+Random version
+
+#+begin_src haskell
+cs = (\x -> paletteR !! x) <$> ([100..107] :: [Int])
+print cs
+#+end_src
+
+
+#+RESULTS:
+| Colour | 0.0 | 0.29 | 0.56 | 1.0 | Colour | 0.58 | 0.29 | 0.69 | 1.0 | Colour | 0.28 | 0.18 | 0.0 | 1.0 | Colour | 0.75 | 0.53 | 0.36 | 1.0 | Colour | 0.0 | 0.49 | 0.58 | 1.0 | Colour | 0.36 | 0.3 | 0.0 | 1.0 | Colour | 0.0 | 0.28 | 0.63 | 1.0 | Colour | 0.59 | 0.56 | 0.42 | 1.0 |
+
+#+begin_src haskell :results output html :exports both
+pSwatch suff f xs = putStrLn $ Text.unpack $ showSwatches "" suff ((("",) . f) <$> xs)
+pSwatch "original" id cs
+pSwatch "greyed" greyed cs
+pSwatch "lightness 0.5" (over lightness' (const 0.5)) cs
+pSwatch "l=0.5, chroma=0.15" (over lightness' (const 0.5) . over chroma' 0.15) cs
+pSwatch "l=0.75, hue=20" (over lightness' (const 0.75) . over hue' 20) cs
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+
+<div>
+
+<div class=swatch style="background:rgba(83%, 33%, 10%, 1.00);"></div>
+<div class=swatch style="background:rgba(65%, 20%, 45%, 1.00);"></div>
+<div class=swatch style="background:rgba(44%, 54%, 71%, 1.00);"></div>
+<div class=swatch style="background:rgba(49%, 26%, 0%, 1.00);"></div>
+<div class=swatch style="background:rgba(64%, 53%, 0%, 1.00);"></div>
+<div class=swatch style="background:rgba(46%, 32%, 17%, 1.00);"></div>
+<div class=swatch style="background:rgba(42%, 67%, 80%, 1.00);"></div>
+<div class=swatch style="background:rgba(0%, 49%, 47%, 1.00);"></div>
+original
+</div>
+<div>
+
+<div class=swatch style="background:rgba(51%, 51%, 51%, 1.00);"></div>
+<div class=swatch style="background:rgba(40%, 40%, 40%, 1.00);"></div>
+<div class=swatch style="background:rgba(54%, 54%, 54%, 1.00);"></div>
+<div class=swatch style="background:rgba(33%, 33%, 33%, 1.00);"></div>
+<div class=swatch style="background:rgba(54%, 54%, 54%, 1.00);"></div>
+<div class=swatch style="background:rgba(35%, 35%, 35%, 1.00);"></div>
+<div class=swatch style="background:rgba(63%, 63%, 63%, 1.00);"></div>
+<div class=swatch style="background:rgba(43%, 43%, 43%, 1.00);"></div>
+greyed
+</div>
+<div>
+
+<div class=swatch style="background:rgba(69%, 19%, -14%, 1.00);"></div>
+<div class=swatch style="background:rgba(63%, 19%, 44%, 1.00);"></div>
+<div class=swatch style="background:rgba(29%, 39%, 55%, 1.00);"></div>
+<div class=swatch style="background:rgba(56%, 33%, 10%, 1.00);"></div>
+<div class=swatch style="background:rgba(48%, 38%, -28%, 1.00);"></div>
+<div class=swatch style="background:rgba(50%, 36%, 21%, 1.00);"></div>
+<div class=swatch style="background:rgba(17%, 42%, 54%, 1.00);"></div>
+<div class=swatch style="background:rgba(-10%, 45%, 43%, 1.00);"></div>
+lightness 0.5
+</div>
+<div>
+
+<div class=swatch style="background:rgba(65%, 24%, 2%, 1.00);"></div>
+<div class=swatch style="background:rgba(62%, 21%, 44%, 1.00);"></div>
+<div class=swatch style="background:rgba(16%, 37%, 72%, 1.00);"></div>
+<div class=swatch style="background:rgba(62%, 28%, -28%, 1.00);"></div>
+<div class=swatch style="background:rgba(50%, 37%, -44%, 1.00);"></div>
+<div class=swatch style="background:rgba(61%, 29%, -33%, 1.00);"></div>
+<div class=swatch style="background:rgba(-60%, 43%, 67%, 1.00);"></div>
+<div class=swatch style="background:rgba(-110%, 48%, 46%, 1.00);"></div>
+l=0.5, chroma=0.15
+</div>
+<div>
+
+<div class=swatch style="background:rgba(100%, 48%, 50%, 1.00);"></div>
+<div class=swatch style="background:rgba(100%, 50%, 51%, 1.00);"></div>
+<div class=swatch style="background:rgba(85%, 61%, 61%, 1.00);"></div>
+<div class=swatch style="background:rgba(91%, 58%, 57%, 1.00);"></div>
+<div class=swatch style="background:rgba(96%, 54%, 55%, 1.00);"></div>
+<div class=swatch style="background:rgba(85%, 61%, 61%, 1.00);"></div>
+<div class=swatch style="background:rgba(87%, 60%, 60%, 1.00);"></div>
+<div class=swatch style="background:rgba(89%, 59%, 59%, 1.00);"></div>
+l=0.75, hue=20
+</div>
+#+end_export
+
+#+begin_src haskell :file other/palette1.svg :results output graphics file :exports both
+writeChartSvg "other/palette1.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions (colourHudOptions (rgb dark)) & over (#hudOptions % #frames) (fmap (second (set #buffer 0.0))))
+#+end_src
+
+** line chart palette1 check
+
+#+begin_src haskell :file other/scratch.svg :results output graphics file :exports both
+writeChartSvg "other/scratch.svg" $ let ch = zipWith (\s l -> LineChart (defaultLineStyle & #size .~ 0.015 & #color .~ s) [l]) cs (fmap (uncurry Point) <$> [ [(0.0, 0.0), (2.8, 3.0)], [(0.5, 4.0), (0.5, 0)], [(0.0, 1.0), (1.0, 1.0), (2.0, 5.0)], [(2.5,1), (0.75,2.5)], [(2.5,2.5), (0.75,4.5)], [(2.5,3.5), (0.75,0.5)], [(0.5,0.5), (1.5,4.0)], [(0.15,1.5), (0.75,3.5)]]) in (mempty & #hudOptions .~ (defaultHudOptions & over #frames (<> [(20, defaultFrameOptions & #buffer .~ 0.04)]) & #titles .~ [ (6, defaultTitle "Palette1 Check" & #style % #size .~ 0.1 ), (8, defaultTitle "Made with love and chart-svg" & #style % #size .~ 0.06 & #place .~ PlaceBottom & #anchor .~ AnchorEnd)] & #legends .~ [ (12, defaultLegendOptions & #textStyle % #size .~ 0.20 & over #frame (fmap (set #color white)) & #place .~ PlaceAbsolute (Point 0.7 (-0.3)) & #content .~ zip (Text.pack . ("pallete1 "<>). show <$> [0..7]) ch)]) & #charts .~ named "line" ch :: ChartSvg)
+#+end_src
+
+#+RESULTS:
+[[file:other/scratch.svg]]
+
+
+LCH printout
+
+#+begin_src haskell :results output :exports both
+import Data.FormatN
+import qualified Data.Text.IO as Text
+f1 cs = (\(LCHA l c h a) -> ("LCHA " <> fixed (Just 2) l <> " " <> fixed (Just 2) c <> " " <> fixed (Just 0) h <> " " <> fixed (Just 0) a)) . review lcha2colour' <$> cs
+sequence_ $ Text.putStrLn <$> f1 cs
+#+end_src
+
+#+RESULTS:
+:
+: > > LCHA 0.82 0.14 207 1
+: LCHA 0.40 0.10 246 1
+: LCHA 0.52 0.22 350 1
+: LCHA 0.80 0.15 331 1
+: LCHA 0.83 0.14 70 1
+: LCHA 0.57 0.15 50 1
+: LCHA 0.33 0.09 129 1
+: LCHA 0.60 0.08 104 1
 
 ** decomposing colors
 
@@ -68,7 +194,7 @@ lightness 0.5
 </div>
 <div>
 
-<div class=swatch style="background:rgba(-105%, 47%, 56%, 1.00);"></div>
+<div class=swatch style="background:rgba(-110%, 47%, 56%, 1.00);"></div>
 <div class=swatch style="background:rgba(-26%, 41%, 70%, 1.00);"></div>
 <div class=swatch style="background:rgba(59%, 30%, -36%, 1.00);"></div>
 <div class=swatch style="background:rgba(64%, 26%, -16%, 1.00);"></div>
@@ -83,7 +209,6 @@ l=0.5, chroma=0.15
 l=0.75, hue=20
 </div>
 #+end_export
-
 
 #+begin_src haskell :file other/combo.svg :results output graphics file :exports both
 writeChartSvg "other/combo.svg" (dotMap 0.01 50 0.3 0.5 cs)
@@ -386,4 +511,6 @@ oklch
   overflow: hidden;
 }
 </style>
+
+
 

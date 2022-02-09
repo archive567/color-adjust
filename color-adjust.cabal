@@ -60,6 +60,7 @@ library
     numhask-array,
     numhask-space,
     adjunctions,
+    formatn,
   default-language:
     Haskell2010
   ghc-options:

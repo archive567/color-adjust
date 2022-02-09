@@ -20,6 +20,7 @@ import NumHask.Array.Fixed
 import Data.Functor.Rep
 import Chart
 import Optics.Core
+import Chart.Examples
 
 -- * charts
 gradientChart :: Int -> Colour -> Colour -> [Chart]
@@ -101,4 +102,5 @@ rgb2ch_ c = ((\(LCH' lch) -> oklch2point_ lch) . view (re lcha2colour' % lch') $
 
 dot_ :: Colour -> Chart
 dot_ x = (\(p,c) -> GlyphChart (defaultGlyphStyle & #size .~ 0.08 & #color .~ c & #borderColor .~ Colour 0.5 0.5 0.5 1 & #shape .~ CircleGlyph) [p]) (rgb2ch_ x)
+
 
