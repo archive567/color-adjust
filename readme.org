@@ -4,6 +4,7 @@
 * Color Experiments
 :PROPERTIES:
 :EXPORT_FILE_NAME: color-adjust
+:CUSTOM_ID: colorexperimentsid
 :export_date: 2022-2-9
 :END:
 
@@ -23,7 +24,7 @@ import Data.Word
 import qualified Data.Text as Text
 import Data.Bifunctor
 import Chart
-import Data.Color.Adjust
+import Data.Colour.Adjust
 import Optics.Core
 cs = palette1 <$> [0..3] :: [Colour]
 lchs = review lcha2colour' <$> cs :: [LCHA]
@@ -186,13 +187,11 @@ Mixing of colours resulting in the interpolated colour being out of gamut is the
 c = Colour 0.72 0.34 0.04 1
 ok = view (re lcha2colour') c
 print c
-prettyLCHA ok
 #+end_src
 
 #+RESULTS:
 :
 : > Colour 0.72 0.34 0.04 1.00
-: LCHA 0.566 0.146 50 1.000
 
 fade to white (LCH 0 0 50 1)
 
@@ -265,6 +264,14 @@ writeChartSvg "other/hue.svg" $ gradient (Just (horig/360.0)) 100 6 100 c0 c1
 [[file:other/hue.svg]]
 
 Whatever the relative success of oklab in providing pleasing human perceptions of consistent colour change, inclusion in the CSS standards are likely to provide a leg up to its usage going forward.
+
+#+begin_src haskell :file other/banner.svg :results output graphics file :exports results
+writeChartSvg "other/banner.svg" $ gradient (Just (horig/360.0)) 100 6 100 (c0 & lch' % lLCH' .~ 0.2 ) (c1 & lch' % lLCH' .~ 0.3 ) & #charts %~ (<> named "text" [(TextChart (defaultTextStyle & #color .~ light & #size .~ 0.1) [("chart-svg", Point 0.4 0.25)])])
+#+end_src
+
+#+RESULTS:
+[[file:other/banner.svg]]
+
 
 ** palette1 Testing
 
