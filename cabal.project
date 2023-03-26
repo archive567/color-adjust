@@ -1,2 +1,4 @@
 packages:
   color-adjust.cabal
+  ../chart-svg/chart-svg.cabal
+  ../numhask-space/numhask-space.cabal

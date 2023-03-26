@@ -36,12 +36,12 @@ gradientChart_ grain c0 c1 =
   where
     d = 1 / fromIntegral grain
 
-gradient :: Maybe Double -> Double -> Double -> Int -> LCHA -> LCHA -> ChartSvg
+gradient :: Maybe Double -> Double -> Double -> Int -> LCHA -> LCHA -> ChartOptions
 gradient marker h fa grain ok0 ok1 =
   mempty
-    & #svgOptions % #svgHeight
+    & #markupOptions % #markupHeight
       .~ h
-    & #svgOptions % #cssOptions % #shapeRendering
+    & #markupOptions % #cssOptions % #shapeRendering
       .~ UseCssCrisp
     & #hudOptions
       .~ ( mempty
@@ -69,7 +69,7 @@ wheelPoints grain l maxchroma =
 -- | wheel chart
 --
 -- > wheel 0.04 100 0.5 0.4
-wheel :: Double -> Int -> Double -> Double -> ChartSvg
+wheel :: Double -> Int -> Double -> Double -> ChartOptions
 wheel s grain l maxchroma =
   mempty
     & #hudOptions .~ defaultHudOptions
@@ -91,7 +91,7 @@ wheel s grain l maxchroma =
 -- | The dotMap
 --
 -- > dotMap 0.01 20 0.8 0.3
-dotMap :: Double -> Int -> Double -> Double -> [Colour] -> ChartSvg
+dotMap :: Double -> Int -> Double -> Double -> [Colour] -> ChartOptions
 dotMap s grain l maxchroma cs =
   mempty
     & #hudOptions

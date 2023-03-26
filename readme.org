@@ -140,7 +140,7 @@ constant lightness and hue
 The chart below plots these 4 colours versus a 2-D slice of the oklab space (a 3-D one) with constant lightness.
 
 #+begin_src haskell :file other/dotwheel.svg :results output graphics file :exports results
-writeChartSvg "other/dotwheel.svg" (dotMap 0.01 50 0.6 0.7 cs)
+writeChartOptions "other/dotwheel.svg" (dotMap 0.01 50 0.6 0.7 cs)
 #+end_src
 
 #+RESULTS:
@@ -164,7 +164,7 @@ Compare the shape of gamuts for lightnesses of 0.3 and 0.7
 *** lightness=0.3
 
 #+begin_src haskell :file other/wheel3.svg :results output graphics file :exports results
-writeChartSvg "other/wheel3.svg" (wheel 0.05 200 0.3 0.6)
+writeChartOptions "other/wheel3.svg" (wheel 0.05 200 0.3 0.6)
 #+end_src
 
 #+RESULTS:
@@ -173,7 +173,7 @@ writeChartSvg "other/wheel3.svg" (wheel 0.05 200 0.3 0.6)
 *** lightness=0.7
 
 #+begin_src haskell :file other/wheel7.svg :results output graphics file :exports results
-writeChartSvg "other/wheel7.svg" (wheel 0.05 200 0.7 0.6)
+writeChartOptions "other/wheel7.svg" (wheel 0.05 200 0.7 0.6)
 #+end_src
 
 #+RESULTS:
@@ -196,7 +196,7 @@ print c
 fade to white (LCH 0 0 50 1)
 
 #+begin_src haskell :file other/towhite.svg :results output graphics file :exports results
-writeChartSvg "other/towhite.svg" $ gradient Nothing 100 6 100 ok (set (lch' % lLCH') 1 ok)
+writeChartOptions "other/towhite.svg" $ gradient Nothing 100 6 100 ok (set (lch' % lLCH') 1 ok)
 #+end_src
 
 #+RESULTS:
@@ -206,7 +206,7 @@ writeChartSvg "other/towhite.svg" $ gradient Nothing 100 6 100 ok (set (lch' % l
 fade to grey (LCH 0.566 0 50 1)
 
 #+begin_src haskell :file other/togrey.svg :results output graphics file :exports results
-writeChartSvg "other/togrey.svg" $ gradient Nothing 100 6 100 ok (set (lch' % c') 0 ok)
+writeChartOptions "other/togrey.svg" $ gradient Nothing 100 6 100 ok (set (lch' % c') 0 ok)
 #+end_src
 
 #+RESULTS:
@@ -216,7 +216,7 @@ writeChartSvg "other/togrey.svg" $ gradient Nothing 100 6 100 ok (set (lch' % c'
 fade to hue=0 (LCH 0.566 0.146 0 1)
 
 #+begin_src haskell :file other/tohue0.svg :results output graphics file :exports results
-writeChartSvg "other/tohue0.svg" $ gradient Nothing 100 6 100 ok (set (lch' % hLCH') 0 ok)
+writeChartOptions "other/tohue0.svg" $ gradient Nothing 100 6 100 ok (set (lch' % hLCH') 0 ok)
 #+end_src
 
 #+RESULTS:
@@ -228,7 +228,7 @@ lightness 0 to 1
 c0 = ok & lch' % lLCH' .~ 0
 c1 = ok & lch' % lLCH' .~ 1
 lorig = view (lch' % lLCH') ok
-writeChartSvg "other/lightness.svg" $ gradient (Just lorig) 100 6 100 c0 c1
+writeChartOptions "other/lightness.svg" $ gradient (Just lorig) 100 6 100 c0 c1
 #+end_src
 
 #+RESULTS:
@@ -243,7 +243,7 @@ chroma 0 to 0.25
 c0 = ok & lch' % cLCH' .~ 0
 c1 = ok & lch' % cLCH' .~ 0.25
 corig = view (lch' % cLCH') ok
-writeChartSvg "other/chroma.svg" $ gradient (Just (corig / 0.25)) 100 6 100 c0 c1
+writeChartOptions "other/chroma.svg" $ gradient (Just (corig / 0.25)) 100 6 100 c0 c1
 #+end_src
 
 #+RESULTS:
@@ -256,7 +256,7 @@ hue 0 to 360
 c0 = ok & lch' % hLCH' .~ 0
 c1 = ok & lch' % hLCH' .~ 360
 horig = view (lch' % hLCH') ok
-writeChartSvg "other/hue.svg" $ gradient (Just (horig/360.0)) 100 6 100 c0 c1
+writeChartOptions "other/hue.svg" $ gradient (Just (horig/360.0)) 100 6 100 c0 c1
 
 #+end_src
 
@@ -266,7 +266,7 @@ writeChartSvg "other/hue.svg" $ gradient (Just (horig/360.0)) 100 6 100 c0 c1
 Whatever the relative success of oklab in providing pleasing human perceptions of consistent colour change, inclusion in the CSS standards are likely to provide a leg up to its usage going forward.
 
 #+begin_src haskell :file other/banner.svg :results output graphics file :exports results
-writeChartSvg "other/banner.svg" $ gradient (Just (horig/360.0)) 100 6 100 (c0 & lch' % lLCH' .~ 0.2 ) (c1 & lch' % lLCH' .~ 0.3 ) & #charts %~ (<> named "text" [(TextChart (defaultTextStyle & #color .~ light & #size .~ 0.1) [("chart-svg", Point 0.4 0.25)])])
+writeChartOptions "other/banner.svg" $ gradient (Just (horig/360.0)) 100 6 100 (c0 & lch' % lLCH' .~ 0.2 ) (c1 & lch' % lLCH' .~ 0.3 ) & #charts %~ (<> named "text" [(TextChart (defaultTextStyle & #color .~ light & #size .~ 0.1) [("chart-svg", Point 0.4 0.25)])])
 #+end_src
 
 #+RESULTS:
@@ -363,7 +363,7 @@ l=0.75, hue=20
 #+end_export
 
 #+begin_src haskell :file other/palette1.svg :results output graphics file :exports results
-writeChartSvg "other/palette1.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions (colourHudOptions (rgb dark)) & over (#hudOptions % #frames) (fmap (second (set #buffer 0.0))))
+writeChartOptions "other/palette1.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions (colourHudOptions (rgb dark)) & over (#hudOptions % #frames) (fmap (second (set #buffer 0.0))))
 #+end_src
 
 #+RESULTS:
@@ -372,7 +372,7 @@ writeChartSvg "other/palette1.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions
 *** Line chart
 
 #+begin_src haskell :file other/scratch.svg :results output graphics file :exports results
-writeChartSvg "other/scratch.svg" $ let ch = zipWith (\s l -> LineChart (defaultLineStyle & #size .~ 0.015 & #color .~ s) [l]) cs (fmap (uncurry Point) <$> [ [(0.0, 0.0), (2.8, 3.0)], [(0.5, 4.0), (0.5, 0)], [(0.0, 1.0), (1.0, 1.0), (2.0, 5.0)], [(2.5,1), (0.75,2.5)], [(2.5,2.5), (0.75,4.5)], [(2.5,3.5), (0.75,0.5)], [(0.5,0.5), (1.5,4.0)], [(0.15,1.5), (0.75,3.5)]]) in (mempty & #hudOptions .~ (defaultHudOptions & over #frames (<> [(20, defaultFrameOptions & #buffer .~ 0.04)]) & #titles .~ [ (6, defaultTitle "Palette1 Check" & #style % #size .~ 0.1 ), (8, defaultTitle "Made with love and chart-svg" & #style % #size .~ 0.06 & #place .~ PlaceBottom & #anchor .~ AnchorEnd)] & #legends .~ [ (12, defaultLegendOptions & #textStyle % #size .~ 0.20 & over #frame (fmap (set #color transparent)) & #place .~ PlaceAbsolute (Point 0.7 (-0.3)) & #content .~ zip (Text.pack . ("pallete1 "<>). show <$> [0..7]) ch)]) & #charts .~ named "line" ch :: ChartSvg)
+writeChartOptions "other/scratch.svg" $ let ch = zipWith (\s l -> LineChart (defaultLineStyle & #size .~ 0.015 & #color .~ s) [l]) cs (fmap (uncurry Point) <$> [ [(0.0, 0.0), (2.8, 3.0)], [(0.5, 4.0), (0.5, 0)], [(0.0, 1.0), (1.0, 1.0), (2.0, 5.0)], [(2.5,1), (0.75,2.5)], [(2.5,2.5), (0.75,4.5)], [(2.5,3.5), (0.75,0.5)], [(0.5,0.5), (1.5,4.0)], [(0.15,1.5), (0.75,3.5)]]) in (mempty & #hudOptions .~ (defaultHudOptions & over #frames (<> [(20, defaultFrameOptions & #buffer .~ 0.04)]) & #titles .~ [ (6, defaultTitle "Palette1 Check" & #style % #size .~ 0.1 ), (8, defaultTitle "Made with love and chart-svg" & #style % #size .~ 0.06 & #place .~ PlaceBottom & #anchor .~ AnchorEnd)] & #legends .~ [ (12, defaultLegendOptions & #textStyle % #size .~ 0.20 & over #frame (fmap (set #color transparent)) & #place .~ PlaceAbsolute (Point 0.7 (-0.3)) & #content .~ zip (Text.pack . ("pallete1 "<>). show <$> [0..7]) ch)]) & #charts .~ named "line" ch :: ChartOptions)
 #+end_src
 
 #+RESULTS:
@@ -411,7 +411,7 @@ print cs
 
 
 #+begin_src haskell :file other/paletter.svg :results output graphics file :exports results
-writeChartSvg "other/paletter.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions (colourHudOptions (rgb dark)) & over (#hudOptions % #frames) (fmap (second (set #buffer 0.0))))
+writeChartOptions "other/paletter.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions (colourHudOptions (rgb dark)) & over (#hudOptions % #frames) (fmap (second (set #buffer 0.0))))
 #+end_src
 
 #+RESULTS:
@@ -419,7 +419,7 @@ writeChartSvg "other/paletter.svg" (dotMap 0.01 50 0.7 0.5 cs & over #hudOptions
 
 
 #+begin_src haskell :file other/liner.svg :results output graphics file :exports results
-writeChartSvg "other/liner.svg" $ let ch = zipWith (\s l -> LineChart (defaultLineStyle & #size .~ 0.015 & #color .~ s) [l]) cs (fmap (uncurry Point) <$> [ [(0.0, 0.0), (2.8, 3.0)], [(0.5, 4.0), (0.5, 0)], [(0.0, 1.0), (1.0, 1.0), (2.0, 5.0)], [(2.5,1), (0.75,2.5)], [(2.5,2.5), (0.75,4.5)], [(2.5,3.5), (0.75,0.5)], [(0.5,0.5), (1.5,4.0)], [(0.15,1.5), (0.75,3.5)]]) in (mempty & #hudOptions .~ (defaultHudOptions & over #frames (<> [(20, defaultFrameOptions & #buffer .~ 0.04)]) & #titles .~ [ (6, defaultTitle "paletter check" & #style % #size .~ 0.1 ), (8, defaultTitle "Made with love and chart-svg" & #style % #size .~ 0.06 & #place .~ PlaceBottom & #anchor .~ AnchorEnd)] & #legends .~ [ (12, defaultLegendOptions & #textStyle % #size .~ 0.20 & over #frame (fmap (set #color transparent)) & #place .~ PlaceAbsolute (Point 0.7 (-0.3)) & #content .~ zip (Text.pack . ("pallete1 "<>). show <$> [0..7]) ch)]) & #charts .~ named "line" ch :: ChartSvg)
+writeChartOptions "other/liner.svg" $ let ch = zipWith (\s l -> LineChart (defaultLineStyle & #size .~ 0.015 & #color .~ s) [l]) cs (fmap (uncurry Point) <$> [ [(0.0, 0.0), (2.8, 3.0)], [(0.5, 4.0), (0.5, 0)], [(0.0, 1.0), (1.0, 1.0), (2.0, 5.0)], [(2.5,1), (0.75,2.5)], [(2.5,2.5), (0.75,4.5)], [(2.5,3.5), (0.75,0.5)], [(0.5,0.5), (1.5,4.0)], [(0.15,1.5), (0.75,3.5)]]) in (mempty & #hudOptions .~ (defaultHudOptions & over #frames (<> [(20, defaultFrameOptions & #buffer .~ 0.04)]) & #titles .~ [ (6, defaultTitle "paletter check" & #style % #size .~ 0.1 ), (8, defaultTitle "Made with love and chart-svg" & #style % #size .~ 0.06 & #place .~ PlaceBottom & #anchor .~ AnchorEnd)] & #legends .~ [ (12, defaultLegendOptions & #textStyle % #size .~ 0.20 & over #frame (fmap (set #color transparent)) & #place .~ PlaceAbsolute (Point 0.7 (-0.3)) & #content .~ zip (Text.pack . ("pallete1 "<>). show <$> [0..7]) ch)]) & #charts .~ named "line" ch :: ChartOptions)
 #+end_src
 
 #+RESULTS:

@@ -43,7 +43,7 @@ library
     , adjunctions
     , attoparsec
     , base                >=4.7   && <5
-    , chart-svg           >=0.3
+    , chart-svg           >=0.4
     , Color               ^>=0.3
     , containers
     , formatn
