@@ -17,20 +17,6 @@ source-repository head
   type:     git
   location: https://github.com/tonyday567/color-adjust
 
-common common-options
-  build-depends:
-    , attoparsec
-    , base                >=4.7   && <5
-    , Color               ^>=0.3
-    , containers
-    , neat-interpolation  ^>=0.5.1
-    , optics-core
-    , random
-    , scientific
-    , text
-
-  default-language: Haskell2010
-
 common ghc-options-stanza
   ghc-options:
     -Wall -Wcompat -Wincomplete-record-updates

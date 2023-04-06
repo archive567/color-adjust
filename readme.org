@@ -30,6 +30,13 @@ cs = palette1 <$> [0..3] :: [Colour]
 lchs = review lcha2colour' <$> cs :: [LCHA]
 #+end_src
 
+#+RESULTS:
+: Loaded GHCi configuration from /Users/tonyday/haskell/color-adjust/.ghci
+: [1 of 1] Compiling Data.Colour.Adjust ( src/Data/Colour/Adjust.hs, interpreted )
+: Ok, one module loaded.
+: ||Ok, one module loaded.
+: |
+
 ** oklch
 
 A new color space model, [[https://bottosson.github.io/posts/oklab/][oklab]], has been introduced to the [[https://www.w3.org/TR/css-color-4/#rgb-functions][CSS standards]].
@@ -60,7 +67,6 @@ print cs
 #+end_src
 
 #+RESULTS:
-:
 : [Colour 0.02 0.73 0.80 1.00,Colour 0.02 0.29 0.48 1.00,Colour 0.66 0.07 0.55 1.00,Colour 0.96 0.60 0.92 1.00]
 
 #+begin_src haskell :exports results
@@ -72,7 +78,7 @@ sequence_ $ Text.putStrLn . prettyLCHA <$> lchs
 #+end_src
 
 #+RESULTS:
-: > > > LCHA 0.720 0.123 207 1.000
+: LCHA 0.720 0.123 207 1.000
 : LCHA 0.400 0.100 246 1.000
 : LCHA 0.500 0.210 338 1.000
 : LCHA 0.800 0.150 331 1.000
@@ -92,7 +98,6 @@ pSwatch "constant lightness and hue" (over lightness' (const 0.5) . over hue' 18
 
 #+RESULTS:
 #+begin_export html
-
 <div>
 
 <div class=swatch style="background:rgba(2%, 73%, 80%, 1.00);"></div>
@@ -190,8 +195,7 @@ print c
 #+end_src
 
 #+RESULTS:
-:
-: > Colour 0.72 0.34 0.04 1.00
+: Colour 0.72 0.34 0.04 1.00
 
 fade to white (LCH 0 0 50 1)
 
@@ -285,7 +289,7 @@ print csu
 #+end_src
 
 #+RESULTS:
-: > > [Colour 0.02 0.73 0.80 1.00,Colour 0.02 0.29 0.48 1.00,Colour 0.66 0.07 0.55 1.00,Colour 0.96 0.60 0.92 1.00,Colour 1.01 0.71 0.35 1.00,Colour 0.73 0.34 0.01 1.00,Colour 0.21 0.29 0.07 1.00,Colour 0.53 0.51 0.28 1.00]
+| Colour | 0.02 | 0.73 | 0.8 | 1.0 | Colour | 0.02 | 0.29 | 0.48 | 1.0 | Colour | 0.66 | 0.07 | 0.55 | 1.0 | Colour | 0.96 | 0.6 | 0.92 | 1.0 | Colour | 1.01 | 0.71 | 0.35 | 1.0 | Colour | 0.73 | 0.34 | 0.01 | 1.0 | Colour | 0.21 | 0.29 | 0.07 | 1.0 | Colour | 0.53 | 0.51 | 0.28 | 1.0 |
 
 
 #+begin_src haskell :results output html :exports results
@@ -299,7 +303,6 @@ pSwatch "l=0.75, hue=20" (over lightness' (const 0.75) . over hue' 20) cs
 
 #+RESULTS:
 #+begin_export html
-
 <div>
 
 <div class=swatch style="background:rgba(2%, 73%, 80%, 1.00);"></div>
@@ -387,8 +390,7 @@ sequence_ $ Text.putStrLn . prettyLCHA <$> x1
 #+end_src
 
 #+RESULTS:
-:
-: > LCHA 0.720 0.123 207 1.000
+: LCHA 0.720 0.123 207 1.000
 : LCHA 0.400 0.100 246 1.000
 : LCHA 0.500 0.210 338 1.000
 : LCHA 0.800 0.150 331 1.000
